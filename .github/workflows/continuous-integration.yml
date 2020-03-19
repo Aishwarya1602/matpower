@@ -42,6 +42,9 @@ jobs:
     - name: Include OSQP?
       if: startsWith(env.OCTAVE_VER, '4.0') != 1
       run: echo "INCLUDE_OSQP=1" >> $GITHUB_ENV
+    - name: Include MP-Element?
+      if: startsWith(env.OCTAVE_VER, '5')
+      run: echo "INCLUDE_MP_ELEMENT=1" >> $GITHUB_ENV
     - name: Build OSQP
       if: env.INCLUDE_OSQP
       run: |
@@ -118,3 +121,14 @@ jobs:
       run: octave-cli --no-gui --eval "test_matpower(0,1)"
     - name: Test MOST
       run: octave-cli --no-gui --eval "test_most(0,1)"
+    - name: Install MP-Element
+      if: env.INCLUDE_MP_ELEMENT
+      run: |
+        git clone --depth=50 https://github.com/MATPOWER/mp-element.git ${GITHUB_WORKSPACE}/mp-element
+        octave-cli --no-gui --eval "install_matpower(1,1,1,1)"
+    - name: Test MP-Element
+      if: env.INCLUDE_MP_ELEMENT
+      run: octave-cli --no-gui --eval "test_mp_element(0,1)"
+    - name: Retest MATPOWER
+      if: env.INCLUDE_MP_ELEMENT
+      run: octave-cli --no-gui --eval "test_matpower(0,1)"
